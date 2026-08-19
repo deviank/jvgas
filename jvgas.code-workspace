@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "JVGas",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true
+    }
+  }
+}

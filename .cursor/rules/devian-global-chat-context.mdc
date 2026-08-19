@@ -1,0 +1,18 @@
+---
+description: Global chat context
+alwaysApply: true
+---
+
+# Global chat context
+
+At the start of a chat, read:
+
+`C:\Users\Devian Business\.cursor\DEVIAN-CHAT-CONTEXT.md`
+
+If that file is missing, skip.
+
+Use it as standing memory (who Devian is, WAMP paths, cPanel deploy rules, active apps).
+
+After useful work, append a short dated note under **Chat log** (newest first). Facts only. Do not paste full transcripts. Never store passwords, API keys, or full bank account numbers.
+
+Keep the file updated in the canonical path when it exists.
