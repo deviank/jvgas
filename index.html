@@ -2,7 +2,7 @@
 <html lang="en-ZA">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>JVGas | The gas installer. Cape Town.</title>
   <meta name="description" content="JVGas — SAQCC-registered domestic and commercial LPG installations in Cape Town. JWV Voskuil, Retreat. Phone 082 650 0955.">
   <meta name="theme-color" content="#000000">
@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -26,22 +26,26 @@
         </svg>
         <span>JVGas</span>
       </a>
-      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Menu">
-        <span></span><span></span>
-      </button>
       <nav class="nav__menu" id="nav-menu" aria-label="Primary">
         <a href="#domestic">Domestic</a>
         <a href="#commercial">Commercial</a>
         <a href="#safety">Safety</a>
         <a href="#contact">Contact</a>
+        <a class="nav__menu-cta" href="https://wa.me/27826500955" target="_blank" rel="noopener">WhatsApp</a>
       </nav>
       <a class="nav__cta" href="https://wa.me/27826500955" target="_blank" rel="noopener">WhatsApp</a>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Menu">
+        <span></span><span></span>
+      </button>
     </div>
   </header>
 
   <main id="main">
     <section class="hero" id="top">
-      <img class="hero__image" src="assets/img/hero.png" alt="A clean gas flame on a black glass hob">
+      <div class="hero__stage">
+        <img class="hero__image" src="assets/img/hero.png" alt="A clean gas flame on a black glass hob">
+      </div>
+      <div class="hero__glow" aria-hidden="true"></div>
       <div class="hero__veil"></div>
       <div class="hero__copy reveal">
         <p class="eyebrow">Cape Town · SAQCC registered</p>
@@ -55,11 +59,16 @@
     </section>
 
     <section class="ribbon" aria-label="Credentials">
-      <p>SAQCC 5295/R<span></span>LPG domestic + commercial vapour<span></span>Licence to 27 Nov 2028<span></span>SANS 10087</p>
+      <p>
+        <span class="ribbon__item">SAQCC 5295/R</span>
+        <span class="ribbon__item">LPG domestic + commercial vapour</span>
+        <span class="ribbon__item">Licence to 27 Nov 2028</span>
+        <span class="ribbon__item">SANS 10087</span>
+      </p>
     </section>
 
     <section class="intro">
-      <div class="intro__copy reveal">
+      <div class="intro__copy reveal" data-speed="0.12">
         <h2>Gas, as it should be.</h2>
         <p>JVGas installs and certifies LPG for Cape Town homes and businesses. One registered practitioner. One number. Work that lasts.</p>
       </div>
@@ -68,7 +77,7 @@
     <section class="tiles" id="domestic">
       <article class="tile reveal">
         <div class="tile__media">
-          <img src="assets/img/domestic.png" alt="A bright modern kitchen with a gas hob">
+          <img src="assets/img/domestic.png" alt="A bright modern kitchen with a gas hob" data-speed="0.38">
         </div>
         <div class="tile__copy">
           <p class="eyebrow">Domestic</p>
@@ -79,7 +88,7 @@
       </article>
       <article class="tile tile--dark reveal" id="commercial">
         <div class="tile__media">
-          <img src="assets/img/commercial.png" alt="A professional kitchen with stainless steel gas ranges">
+          <img src="assets/img/commercial.png" alt="A professional kitchen with stainless steel gas ranges" data-speed="0.42">
         </div>
         <div class="tile__copy">
           <p class="eyebrow">Commercial</p>
@@ -90,9 +99,20 @@
       </article>
     </section>
 
+    <section class="pin" aria-label="Cape Town installations">
+      <div class="pin__sticky">
+        <img class="pin__image" src="assets/img/commercial.png" alt="" aria-hidden="true">
+        <div class="pin__veil"></div>
+        <div class="pin__copy">
+          <p class="eyebrow">Western Cape</p>
+          <h2>Every flame,<br>to code.</h2>
+        </div>
+      </div>
+    </section>
+
     <section class="feature" id="safety">
       <div class="feature__media reveal">
-        <img src="assets/img/safety.png" alt="Studio still of a certificate and a gas fitting">
+        <img src="assets/img/safety.png" alt="Studio still of a certificate and a gas fitting" data-speed="0.28">
       </div>
       <div class="feature__copy reveal">
         <p class="eyebrow">Safety</p>
@@ -153,17 +173,17 @@
         <h2>Three steps.</h2>
       </div>
       <ol class="steps__list">
-        <li class="reveal">
+        <li class="reveal" data-speed="0.14">
           <span>01</span>
           <h3>WhatsApp us</h3>
           <p>Send the job. Photos help. We reply with a time.</p>
         </li>
-        <li class="reveal">
+        <li class="reveal" data-speed="0.22">
           <span>02</span>
           <h3>We come out</h3>
           <p>Site check at the home or kitchen. Clear quote. No fuss.</p>
         </li>
-        <li class="reveal">
+        <li class="reveal" data-speed="0.3">
           <span>03</span>
           <h3>Installed and certified</h3>
           <p>Work done to code. Paperwork you can keep.</p>
@@ -178,15 +198,15 @@
         <p>WhatsApp is fastest. Call if you prefer. We work by appointment across the southern suburbs.</p>
       </div>
       <div class="contact__cards reveal">
-        <a class="card" href="https://wa.me/27826500955" target="_blank" rel="noopener">
+        <a class="card" href="https://wa.me/27826500955" target="_blank" rel="noopener" data-speed="0.1">
           <p class="card__label">WhatsApp</p>
           <p class="card__value">082 650 0955</p>
         </a>
-        <a class="card" href="tel:+27826500955">
+        <a class="card" href="tel:+27826500955" data-speed="0.18">
           <p class="card__label">Call</p>
           <p class="card__value">082 650 0955</p>
         </a>
-        <a class="card" href="https://maps.google.com/?q=5+Sasweer+Road+Retreat+Cape+Town" target="_blank" rel="noopener">
+        <a class="card" href="https://maps.google.com/?q=5+Sasweer+Road+Retreat+Cape+Town" target="_blank" rel="noopener" data-speed="0.26">
           <p class="card__label">Workshop</p>
           <p class="card__value">5 Sasweer Road, Retreat</p>
         </a>
@@ -224,6 +244,6 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js"></script>
+  <script src="assets/js/main.js?v=2"></script>
 </body>
 </html>
