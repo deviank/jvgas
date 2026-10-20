@@ -130,6 +130,14 @@ h1, h2, h3 {
 
 .link:hover { text-decoration: underline; }
 
+button.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 .nav {
   position: sticky;
   top: 0;
@@ -280,7 +288,7 @@ h1, h2, h3 {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.15) 48%, rgba(0, 0, 0, 0.35) 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.9) 36%, rgba(0, 0, 0, 0.62) 68%, rgba(0, 0, 0, 0.5) 100%);
   will-change: opacity;
 }
 
@@ -434,7 +442,7 @@ h1, h2, h3 {
 .pin__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.28) 55%, rgba(0, 0, 0, 0.4));
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.84) 0%, rgba(0, 0, 0, 0.7) 46%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 .pin__copy {
@@ -895,3 +903,280 @@ h1, h2, h3 {
     height: 100%;
   }
 }
+
+body.book-open,
+body.remind-open { overflow: hidden; }
+
+.book[hidden] { display: none; }
+
+.book {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  padding: 16px var(--page-pad) calc(16px + var(--safe-bottom));
+}
+
+.book__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.72);
+  cursor: pointer;
+}
+
+.book__panel {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(92svh, 860px);
+  overflow: auto;
+  background: #0a0a0a;
+  color: #f5f5f7;
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+}
+
+.book__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 980px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.book h2 {
+  font-size: clamp(32px, 6vw, 44px);
+  margin-bottom: 8px;
+  padding-right: 72px;
+}
+
+.book__lead,
+.book__hint {
+  color: #d2d2d7;
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+.book__month {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.book__month p {
+  text-align: center;
+  font-weight: 600;
+}
+
+.book__nav {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 980px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.book__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.book__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.book__dow,
+.book__day {
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.book__dow {
+  color: #86868b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.book__day {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #f5f5f7;
+  font: inherit;
+  cursor: pointer;
+}
+
+.book__day--empty { pointer-events: none; }
+
+.book__day:disabled {
+  color: #4a4a4d;
+  cursor: default;
+}
+
+.book__day.is-today { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35); }
+
+.book__day.is-selected,
+.book__slot.is-selected {
+  background: #fff;
+  color: #000;
+}
+
+.book__slotlist {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.book__slot {
+  min-height: 44px;
+  border: 0;
+  border-radius: 980px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.book__slot:disabled {
+  color: #6e6e73;
+  cursor: default;
+}
+
+.book__form {
+  display: grid;
+  gap: 12px;
+}
+
+.book__form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #a1a1a6;
+}
+
+.book__form input {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 16px;
+  padding: 0 14px;
+}
+
+.book__form .btn,
+.book__actions .btn { width: 100%; }
+
+.book__error {
+  color: var(--flame);
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.book__when {
+  font-size: clamp(22px, 4vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+
+.book__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (min-width: 735px) {
+  .book { place-items: center; }
+}
+
+.remind[hidden] { display: none; }
+
+.remind {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 16px var(--page-pad);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.remind__panel {
+  width: min(440px, 100%);
+  background: #0a0a0a;
+  color: #f5f5f7;
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.remind h2 {
+  font-size: clamp(28px, 5vw, 40px);
+  margin-bottom: 8px;
+}
+
+.remind__when {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.remind__who,
+.remind__due {
+  color: #d2d2d7;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.remind__snooze {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+.remind__snooze label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #a1a1a6;
+}
+
+.remind__snooze select {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 16px;
+  padding: 0 12px;
+}
+
+.remind__panel > .btn { width: 100%; margin-top: 10px; }

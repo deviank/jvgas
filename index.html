@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>JVGas | The gas installer. Cape Town.</title>
-  <meta name="description" content="JVGas — SAQCC-registered domestic and commercial LPG installations in Cape Town. JWV Voskuil, Retreat. Phone 082 650 0955.">
+  <meta name="description" content="JVGas — SAQCC-registered domestic and commercial LPG installations in Cape Town. JWV Voskuil, Retreat. Phone 072 105 7941.">
   <meta name="theme-color" content="#000000">
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
   <meta property="og:title" content="JVGas | The gas installer.">
@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=3">
+  <link rel="stylesheet" href="assets/css/style.css?v=6">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -31,9 +31,9 @@
         <a href="#commercial">Commercial</a>
         <a href="#safety">Safety</a>
         <a href="#contact">Contact</a>
-        <a class="nav__menu-cta" href="https://wa.me/27826500955" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="nav__menu-cta" href="https://wa.me/27721057941" target="_blank" rel="noopener">WhatsApp</a>
       </nav>
-      <a class="nav__cta" href="https://wa.me/27826500955" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="nav__cta" href="https://wa.me/27721057941" target="_blank" rel="noopener">WhatsApp</a>
       <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-menu" aria-label="Menu">
         <span></span><span></span>
       </button>
@@ -52,7 +52,7 @@
         <h1>The gas<br>installer.</h1>
         <p class="hero__lead">Domestic and commercial LPG, installed to code. Quiet work. Written proof.</p>
         <div class="hero__actions">
-          <a class="btn btn--light" href="https://wa.me/27826500955" target="_blank" rel="noopener">Get in touch</a>
+          <a class="btn btn--light" href="https://wa.me/27721057941" target="_blank" rel="noopener">Get in touch</a>
           <a class="btn btn--ghost" href="#safety">Learn more</a>
         </div>
       </div>
@@ -83,7 +83,7 @@
           <p class="eyebrow">Domestic</p>
           <h3>For the home.</h3>
           <p>Hobs, stoves, geysers, and braais. Installed to SANS 10087-1 so the kitchen just works.</p>
-          <a class="link" href="#contact">Book a visit</a>
+          <button class="link" type="button" data-book-open>Book a visit</button>
         </div>
       </article>
       <article class="tile tile--dark reveal" id="commercial">
@@ -198,13 +198,13 @@
         <p>WhatsApp is fastest. Call if you prefer. We work by appointment across the southern suburbs.</p>
       </div>
       <div class="contact__cards reveal">
-        <a class="card" href="https://wa.me/27826500955" target="_blank" rel="noopener" data-speed="0.1">
+        <a class="card" href="https://wa.me/27721057941" target="_blank" rel="noopener" data-speed="0.1">
           <p class="card__label">WhatsApp</p>
-          <p class="card__value">082 650 0955</p>
+          <p class="card__value">072 105 7941</p>
         </a>
-        <a class="card" href="tel:+27826500955" data-speed="0.18">
+        <a class="card" href="tel:+27721057941" data-speed="0.18">
           <p class="card__label">Call</p>
-          <p class="card__value">082 650 0955</p>
+          <p class="card__value">072 105 7941</p>
         </a>
         <a class="card" href="https://maps.google.com/?q=5+Sasweer+Road+Retreat+Cape+Town" target="_blank" rel="noopener" data-speed="0.26">
           <p class="card__label">Workshop</p>
@@ -230,7 +230,7 @@
         <div>
           <p>Account</p>
           <a href="https://saqccgas.co.za/member/?r=7344" target="_blank" rel="noopener">SAQCC register</a>
-          <a href="https://wa.me/27826500955" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="https://wa.me/27721057941" target="_blank" rel="noopener">WhatsApp</a>
           <a href="#contact">Contact</a>
         </div>
         <div>
@@ -244,6 +244,72 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js?v=2"></script>
+  <div class="book" id="book" hidden>
+    <button class="book__backdrop" type="button" data-book-close aria-label="Close booking"></button>
+    <div class="book__panel" role="dialog" aria-modal="true" aria-labelledby="book-title">
+      <button class="book__close" type="button" data-book-close aria-label="Close">Close</button>
+      <div id="book-flow">
+        <p class="eyebrow">By appointment</p>
+        <h2 id="book-title">Book a visit.</h2>
+        <p class="book__lead">Choose a day and a time. You stay on this page.</p>
+        <div class="book__cal" id="book-cal"></div>
+        <div class="book__slots" id="book-slots"></div>
+        <p class="book__error" id="book-error" hidden></p>
+        <form class="book__form" id="book-form" hidden>
+          <label>Name
+            <input name="name" type="text" autocomplete="name" required maxlength="80">
+          </label>
+          <label>Phone
+            <input name="phone" type="tel" autocomplete="tel" required inputmode="tel" maxlength="20">
+          </label>
+          <label>What do you need
+            <input name="note" type="text" maxlength="160" placeholder="Hob, geyser, commercial kitchen">
+          </label>
+          <button class="btn btn--light" type="submit">Request this visit</button>
+        </form>
+      </div>
+      <div id="book-done" hidden>
+        <p class="eyebrow">Requested</p>
+        <h2>You’re in the diary.</h2>
+        <p class="book__when" id="book-when"></p>
+        <p class="book__lead" id="book-who"></p>
+        <p class="book__hint">If this page is open, a reminder appears 15 minutes before the visit, and again 5 minutes before. Snooze it in 15-minute steps.</p>
+        <div class="book__actions">
+          <button class="btn btn--light" type="button" id="book-ics">Add to calendar</button>
+          <a class="btn btn--ghost" id="book-wa" href="https://wa.me/27721057941" target="_blank" rel="noopener">Send on WhatsApp</a>
+          <button class="btn btn--ghost" type="button" data-book-close>Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="remind" id="remind" hidden>
+    <div class="remind__panel" role="dialog" aria-modal="true" aria-labelledby="remind-title">
+      <p class="eyebrow">Reminder</p>
+      <h2 id="remind-title">Site visit</h2>
+      <p class="remind__when" id="remind-when"></p>
+      <p class="remind__who" id="remind-who"></p>
+      <p class="remind__due" id="remind-due"></p>
+      <div class="remind__snooze">
+        <label>Snooze
+          <select id="remind-snooze">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="75">1 hour 15 minutes</option>
+            <option value="90">1 hour 30 minutes</option>
+            <option value="105">1 hour 45 minutes</option>
+            <option value="120">2 hours</option>
+          </select>
+        </label>
+        <button class="btn btn--light" type="button" id="remind-snooze-btn">Snooze</button>
+      </div>
+      <button class="btn btn--ghost" type="button" id="remind-dismiss">Dismiss</button>
+    </div>
+  </div>
+
+  <script src="assets/js/main.js?v=3"></script>
+  <script src="assets/js/booking.js?v=2"></script>
 </body>
 </html>
