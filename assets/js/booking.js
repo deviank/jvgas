@@ -30,8 +30,11 @@
     button.addEventListener("click", close);
   });
   document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    var remind = document.getElementById("remind");
+    if (remind && !remind.hidden) return;
     if (root.hidden) return;
-    if (event.key === "Escape") close();
+    close();
   });
   form.addEventListener("submit", onSubmit);
   document.getElementById("book-ics").addEventListener("click", downloadIcs);
@@ -207,12 +210,19 @@
       time: selectedTime,
       name: name,
       phone: phone,
-      note: note
+      note: note,
+      remindAt: meetingStart(iso(selectedDate), selectedTime) - 15 * 60 * 1000,
+      earlyDismissed: false,
+      finalDismissed: false
     };
     var all = load();
     all.push(entry);
     localStorage.setItem(STORAGE, JSON.stringify(all));
+    if (typeof Notification !== "undefined" && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
     showDone(entry);
+    armReminders();
   }
 
   function showDone(entry) {
@@ -251,6 +261,16 @@
       "SUMMARY:" + summary,
       "DESCRIPTION:" + description.replace(/\n/g, " "),
       "LOCATION:Cape Town",
+      "BEGIN:VALARM",
+      "TRIGGER:-PT15M",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:JVGas visit in 15 minutes",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "TRIGGER:-PT5M",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:JVGas visit in 5 minutes",
+      "END:VALARM",
       "END:VEVENT",
       "END:VCALENDAR"
     ].join("\r\n");
@@ -325,5 +345,160 @@
 
   function stamp(date, time) {
     return date.replace(/-/g, "") + "T" + time.replace(":", "") + "00";
+  }
+
+  var remindRoot = document.getElementById("remind");
+  var remindTimer = null;
+  var activeReminder = "";
+  var notified = {};
+
+  if (remindRoot) {
+    document.getElementById("remind-snooze-btn").addEventListener("click", snoozeReminder);
+    document.getElementById("remind-dismiss").addEventListener("click", dismissReminder);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) checkReminders();
+    });
+    checkReminders();
+  }
+
+  function meetingStart(date, time) {
+    var day = fromIso(date);
+    var parts = time.split(":");
+    return new Date(day.getFullYear(), day.getMonth(), day.getDate(), Number(parts[0]), Number(parts[1])).getTime();
+  }
+
+  function entryKey(entry) {
+    return entry.date + "|" + entry.time;
+  }
+
+  function updateEntry(date, time, mutate) {
+    var all = load();
+    all.forEach(function (entry) {
+      if (entry.date === date && entry.time === time) mutate(entry);
+    });
+    localStorage.setItem(STORAGE, JSON.stringify(all));
+  }
+
+  function alarmFor(entry, now) {
+    var start = meetingStart(entry.date, entry.time);
+    if (now > start + 24 * 60 * 60 * 1000) return null;
+    var finalAt = start - 5 * 60 * 1000;
+    var earlyAt = entry.remindAt != null ? entry.remindAt : start - 15 * 60 * 1000;
+    if (!entry.finalDismissed && now >= finalAt) return { kind: "final", start: start };
+    if (!entry.earlyDismissed && now >= earlyAt && (entry.finalDismissed || now < finalAt)) {
+      return { kind: "early", start: start };
+    }
+    return null;
+  }
+
+  function checkReminders() {
+    if (!remindRoot) return;
+    var now = Date.now();
+    var due = null;
+    load().some(function (entry) {
+      var alarm = alarmFor(entry, now);
+      if (!alarm) return false;
+      due = { entry: entry, alarm: alarm };
+      return true;
+    });
+    if (!due) {
+      hideReminder();
+      armReminders();
+      return;
+    }
+    var key = entryKey(due.entry) + "|" + due.alarm.kind;
+    if (!remindRoot.hidden && activeReminder === key) {
+      armReminders();
+      return;
+    }
+    showReminder(due.entry, due.alarm);
+    armReminders();
+  }
+
+  function showReminder(entry, alarm) {
+    activeReminder = entryKey(entry) + "|" + alarm.kind;
+    remindRoot.hidden = false;
+    document.body.classList.add("remind-open");
+    var mins = Math.round((alarm.start - Date.now()) / 60000);
+    var due = "Starts now.";
+    var title = "Starts now.";
+    if (mins > 1) {
+      due = "Starts in " + mins + " minutes.";
+      title = mins + " minutes to go.";
+    } else if (mins === 1) {
+      due = "Starts in 1 minute.";
+      title = "1 minute to go.";
+    } else if (mins < 0) {
+      due = "This visit has started.";
+      title = "Visit started.";
+    }
+    document.getElementById("remind-title").textContent = title;
+    document.getElementById("remind-when").textContent = formatLong(fromIso(entry.date)) + " at " + entry.time;
+    document.getElementById("remind-who").textContent = entry.name + (entry.note ? " · " + entry.note : "");
+    document.getElementById("remind-due").textContent = due;
+    remindRoot.dataset.date = entry.date;
+    remindRoot.dataset.time = entry.time;
+    remindRoot.dataset.kind = alarm.kind;
+    var snoozeBtn = document.getElementById("remind-snooze-btn");
+    if (snoozeBtn) snoozeBtn.focus();
+    notifyOnce(entry, alarm, due);
+  }
+
+  function hideReminder() {
+    if (!remindRoot || remindRoot.hidden) return;
+    remindRoot.hidden = true;
+    document.body.classList.remove("remind-open");
+    activeReminder = "";
+  }
+
+  function snoozeReminder() {
+    var date = remindRoot.dataset.date;
+    var time = remindRoot.dataset.time;
+    var kind = remindRoot.dataset.kind;
+    var select = document.getElementById("remind-snooze");
+    var minutes = Number(select && select.value) || 15;
+    if (minutes % 15 !== 0) minutes = 15;
+    updateEntry(date, time, function (entry) {
+      entry.remindAt = Date.now() + minutes * 60 * 1000;
+      entry.earlyDismissed = false;
+      if (kind === "final") entry.finalDismissed = true;
+    });
+    hideReminder();
+    checkReminders();
+  }
+
+  function dismissReminder() {
+    var date = remindRoot.dataset.date;
+    var time = remindRoot.dataset.time;
+    var kind = remindRoot.dataset.kind;
+    updateEntry(date, time, function (entry) {
+      if (kind === "final") {
+        entry.finalDismissed = true;
+        entry.earlyDismissed = true;
+      } else {
+        entry.earlyDismissed = true;
+      }
+    });
+    hideReminder();
+    checkReminders();
+  }
+
+  function notifyOnce(entry, alarm, due) {
+    var key = entryKey(entry) + "|" + alarm.kind + "|" + (entry.remindAt || "");
+    if (notified[key]) return;
+    notified[key] = true;
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+    try {
+      new Notification(alarm.kind === "final" ? "JVGas visit in 5 minutes" : "JVGas visit reminder", {
+        body: formatLong(fromIso(entry.date)) + " at " + entry.time + ". " + due
+      });
+    } catch (error) {
+      return;
+    }
+  }
+
+  function armReminders() {
+    if (remindTimer) clearTimeout(remindTimer);
+    remindTimer = setTimeout(checkReminders, 15000);
   }
 })();

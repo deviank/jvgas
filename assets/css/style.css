@@ -904,7 +904,8 @@ button.link {
   }
 }
 
-body.book-open { overflow: hidden; }
+body.book-open,
+body.remind-open { overflow: hidden; }
 
 .book[hidden] { display: none; }
 
@@ -1111,3 +1112,71 @@ body.book-open { overflow: hidden; }
 @media (min-width: 735px) {
   .book { place-items: center; }
 }
+
+.remind[hidden] { display: none; }
+
+.remind {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 16px var(--page-pad);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.remind__panel {
+  width: min(440px, 100%);
+  background: #0a0a0a;
+  color: #f5f5f7;
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+}
+
+.remind h2 {
+  font-size: clamp(28px, 5vw, 40px);
+  margin-bottom: 8px;
+}
+
+.remind__when {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.remind__who,
+.remind__due {
+  color: #d2d2d7;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.remind__snooze {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+.remind__snooze label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #a1a1a6;
+}
+
+.remind__snooze select {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 16px;
+  padding: 0 12px;
+}
+
+.remind__panel > .btn { width: 100%; margin-top: 10px; }

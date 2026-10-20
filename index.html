@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=5">
+  <link rel="stylesheet" href="assets/css/style.css?v=6">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -273,6 +273,7 @@
         <h2>You’re in the diary.</h2>
         <p class="book__when" id="book-when"></p>
         <p class="book__lead" id="book-who"></p>
+        <p class="book__hint">If this page is open, a reminder appears 15 minutes before the visit, and again 5 minutes before. Snooze it in 15-minute steps.</p>
         <div class="book__actions">
           <button class="btn btn--light" type="button" id="book-ics">Add to calendar</button>
           <a class="btn btn--ghost" id="book-wa" href="https://wa.me/27721057941" target="_blank" rel="noopener">Send on WhatsApp</a>
@@ -282,7 +283,33 @@
     </div>
   </div>
 
+  <div class="remind" id="remind" hidden>
+    <div class="remind__panel" role="dialog" aria-modal="true" aria-labelledby="remind-title">
+      <p class="eyebrow">Reminder</p>
+      <h2 id="remind-title">Site visit</h2>
+      <p class="remind__when" id="remind-when"></p>
+      <p class="remind__who" id="remind-who"></p>
+      <p class="remind__due" id="remind-due"></p>
+      <div class="remind__snooze">
+        <label>Snooze
+          <select id="remind-snooze">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60">1 hour</option>
+            <option value="75">1 hour 15 minutes</option>
+            <option value="90">1 hour 30 minutes</option>
+            <option value="105">1 hour 45 minutes</option>
+            <option value="120">2 hours</option>
+          </select>
+        </label>
+        <button class="btn btn--light" type="button" id="remind-snooze-btn">Snooze</button>
+      </div>
+      <button class="btn btn--ghost" type="button" id="remind-dismiss">Dismiss</button>
+    </div>
+  </div>
+
   <script src="assets/js/main.js?v=3"></script>
-  <script src="assets/js/booking.js?v=1"></script>
+  <script src="assets/js/booking.js?v=2"></script>
 </body>
 </html>
