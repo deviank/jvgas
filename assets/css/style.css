@@ -280,7 +280,7 @@ h1, h2, h3 {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.15) 48%, rgba(0, 0, 0, 0.35) 100%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.9) 36%, rgba(0, 0, 0, 0.62) 68%, rgba(0, 0, 0, 0.5) 100%);
   will-change: opacity;
 }
 
@@ -434,7 +434,7 @@ h1, h2, h3 {
 .pin__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.28) 55%, rgba(0, 0, 0, 0.4));
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.84) 0%, rgba(0, 0, 0, 0.7) 46%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 .pin__copy {

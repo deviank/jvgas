@@ -114,7 +114,7 @@
     }
 
     if (heroVeil && !compact) {
-      heroVeil.style.opacity = String(Math.min(1, 0.85 + y / (vh * 1.6)));
+      heroVeil.style.opacity = "1";
     }
 
     if (heroGlow) {
