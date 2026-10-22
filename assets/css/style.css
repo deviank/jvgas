@@ -1087,6 +1087,11 @@ body.remind-open { overflow: hidden; }
   padding: 0 14px;
 }
 
+.book__form input[type="file"] {
+  background: transparent;
+  padding: 8px 0;
+}
+
 .book__form .btn,
 .book__actions .btn { width: 100%; }
 
@@ -1180,3 +1185,185 @@ body.remind-open { overflow: hidden; }
 }
 
 .remind__panel > .btn { width: 100%; margin-top: 10px; }
+
+.tile__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  justify-content: center;
+}
+
+.gas-fab {
+  position: fixed;
+  z-index: 60;
+  left: max(16px, var(--page-pad));
+  bottom: calc(16px + var(--safe-bottom));
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 980px;
+  background: var(--flame);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+body.nav-open .gas-fab { visibility: hidden; }
+
+.gas__steps {
+  list-style: none;
+  margin: 8px 0 18px;
+}
+
+.gas__steps li {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.quote__types,
+.quote__previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.quote__type,
+.quote__preview {
+  border: 0;
+  border-radius: 980px;
+  min-height: 40px;
+  padding: 0 14px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.quote__type.is-selected {
+  background: #fff;
+  color: #000;
+}
+
+.quote__preview {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  width: 72px;
+  height: 72px;
+}
+
+.quote__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cert {
+  min-height: 100svh;
+  padding: calc(32px + var(--safe-top)) var(--page-pad) calc(48px + var(--safe-bottom));
+}
+
+.cert__sheet {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border-radius: 28px;
+  padding: clamp(28px, 5vw, 48px);
+}
+
+.cert__sheet h1 {
+  font-size: clamp(32px, 6vw, 48px);
+  margin: 8px 0 18px;
+}
+
+.cert__mark {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.cert__status {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 6px 12px;
+  border-radius: 980px;
+  background: #1d1d1f;
+  color: #f5f5f7;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cert__sheet dl > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) 1fr;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.cert__sheet dt { color: #6e6e73; }
+
+.cert__sheet dd { font-weight: 600; }
+
+.cert__note {
+  margin-top: 18px;
+  color: #6e6e73;
+  font-size: 14px;
+}
+
+.cert__form {
+  display: grid;
+  gap: 12px;
+}
+
+.cert__form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.cert__form input {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  color: #1d1d1f;
+  font: inherit;
+  font-size: 16px;
+  padding: 0 14px;
+}
+
+.cert__actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cert__actions .btn--light {
+  background: #1d1d1f;
+  color: #f5f5f7;
+}
+
+.cert__actions .btn--ghost {
+  color: #1d1d1f;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.28);
+}
+
+#quote-done .btn { width: 100%; margin-top: 12px; }
+
+.cert__back {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: #1d1d1f;
+  font-size: 15px;
+}

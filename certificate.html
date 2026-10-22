@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Certificate of Conformity | JVGas</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=7">
+</head>
+<body>
+  <main class="cert">
+    <article class="cert__sheet" id="cert-record" hidden>
+      <a class="cert__back" href="index.html">JVGas</a>
+      <p class="cert__mark">JVGas · Cape Town</p>
+      <h1>Certificate of Conformity issued.</h1>
+      <p class="cert__status">Issued</p>
+      <dl>
+        <div>
+          <dt>Job date</dt>
+          <dd id="cert-date"></dd>
+        </div>
+        <div>
+          <dt>Address</dt>
+          <dd id="cert-address"></dd>
+        </div>
+        <div id="cert-name-row" hidden>
+          <dt>Customer</dt>
+          <dd id="cert-name"></dd>
+        </div>
+        <div id="cert-ref-row" hidden>
+          <dt>Reference</dt>
+          <dd id="cert-ref"></dd>
+        </div>
+        <div>
+          <dt>Practitioner</dt>
+          <dd>JWV Voskuil</dd>
+        </div>
+        <div>
+          <dt>SAQCC ID</dt>
+          <dd>5295/R</dd>
+        </div>
+        <div>
+          <dt>Standards</dt>
+          <dd>SANS 10087-1 · SANS 10087-2</dd>
+        </div>
+      </dl>
+      <p class="cert__note">This record confirms a Certificate of Conformity was issued for this job. The signed certificate is the copy to keep for an insurer or a landlord. <a href="https://saqccgas.co.za/member/?r=7344" target="_blank" rel="noopener">SAQCC register</a></p>
+    </article>
+
+    <section class="cert__sheet" id="cert-issue">
+      <a class="cert__back" href="index.html">Back to JVGas</a>
+      <p class="cert__mark">For Joseph</p>
+      <h1>Issue a certificate.</h1>
+      <p class="cert__note">Fill in the job. The customer gets a page you can send on WhatsApp.</p>
+      <form class="cert__form" id="cert-form">
+        <label>Job date
+          <input name="date" type="date" required>
+        </label>
+        <label>Address
+          <input name="address" type="text" required maxlength="140" placeholder="Street, suburb">
+        </label>
+        <label>Customer name
+          <input name="name" type="text" maxlength="80">
+        </label>
+        <label>Customer WhatsApp
+          <input name="phone" type="tel" inputmode="tel" maxlength="20" placeholder="072 105 7941">
+        </label>
+        <label>Reference
+          <input name="ref" type="text" maxlength="40" placeholder="Optional">
+        </label>
+        <p class="book__error" id="cert-error" hidden></p>
+        <div class="cert__actions">
+          <button class="btn btn--light" type="submit">Create the link</button>
+          <a class="btn btn--ghost" id="cert-wa" href="https://wa.me/27721057941" target="_blank" rel="noopener" hidden>Send on WhatsApp</a>
+          <button class="btn btn--ghost" id="cert-copy" type="button" hidden>Copy link</button>
+        </div>
+        <p class="cert__note" id="cert-link" hidden></p>
+      </form>
+    </section>
+  </main>
+  <script src="assets/js/certificate.js?v=1"></script>
+</body>
+</html>
