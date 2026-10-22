@@ -717,6 +717,16 @@ button.link {
 
 .footer__cols a:hover { text-decoration: underline; }
 
+.footer__cols .footer__credit a {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  color: #1d1d1f;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .footer__note {
   padding-top: 20px;
   color: #86868b;
@@ -929,10 +939,11 @@ body.remind-open { overflow: hidden; }
 .book__panel {
   position: relative;
   width: min(560px, 100%);
+  min-width: 0;
+  max-width: 100%;
   max-height: min(92svh, 860px);
   overflow: auto;
-  background: #0a0a0a;
-  color: #f5f5f7;
+  background: #0a0a0a;  color: #f5f5f7;
   border-radius: 28px;
   padding: 28px 22px 22px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
@@ -1067,16 +1078,24 @@ body.remind-open { overflow: hidden; }
 .book__form {
   display: grid;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .book__form label {
   display: grid;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
   font-size: 13px;
   color: #a1a1a6;
 }
 
 .book__form input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 44px;
   border: 0;
   border-radius: 12px;
@@ -1090,6 +1109,7 @@ body.remind-open { overflow: hidden; }
 .book__form input[type="file"] {
   background: transparent;
   padding: 8px 0;
+  overflow: hidden;
 }
 
 .book__form .btn,
