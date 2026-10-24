@@ -753,6 +753,25 @@ button.link {
   }
 }
 
+@media (min-width: 735px) {
+  .nav__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .nav__brand { justify-self: start; }
+
+  .nav__menu {
+    flex: none;
+    justify-self: center;
+  }
+
+  .nav__cta {
+    margin-left: 0;
+    justify-self: end;
+  }
+}
+
 /* Tablet */
 @media (max-width: 1024px) {
   .nav__menu { gap: 20px; }
