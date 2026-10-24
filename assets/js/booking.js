@@ -4,6 +4,14 @@
 
   var WHATSAPP = "27721057941";
   var SLOTS = ["08:00", "09:30", "11:00", "13:00", "14:30", "16:00"];
+  var CREW = [
+    { id: "joseph", name: "Joseph Voskuil" },
+    { id: "thabo", name: "Thabo Mokoena" },
+    { id: "andre", name: "Andre Pietersen" },
+    { id: "sipho", name: "Sipho Nkosi" },
+    { id: "liam", name: "Liam Jacobs" },
+    { id: "kyle", name: "Kyle Adams" }
+  ];
   var WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   var STORAGE = "jvgas-visits";
@@ -21,6 +29,7 @@
   var view = new Date(today.getFullYear(), today.getMonth(), 1);
   var selectedDate = null;
   var selectedTime = "";
+  var selectedPerson = "";
   var lastFocus = null;
 
   document.querySelectorAll("[data-book-open]").forEach(function (button) {
@@ -57,6 +66,7 @@
   function resetFlow() {
     selectedDate = null;
     selectedTime = "";
+    selectedPerson = "";
     flow.hidden = false;
     done.hidden = true;
     form.hidden = true;
@@ -69,7 +79,7 @@
   function render() {
     renderCalendar();
     renderSlots();
-    form.hidden = !selectedTime;
+    form.hidden = !selectedTime || !selectedPerson;
   }
 
   function renderCalendar() {
@@ -136,6 +146,7 @@
         return function () {
           selectedDate = picked;
           selectedTime = "";
+          selectedPerson = "";
           showError("");
           render();
         };
@@ -161,40 +172,95 @@
     var list = document.createElement("div");
     list.className = "book__slotlist";
     SLOTS.forEach(function (time) {
-      var taken = isTaken(selectedDate, time);
+      var free = freeCrew(selectedDate, time);
       var passed = isPastSlot(selectedDate, time);
       var button = document.createElement("button");
       button.type = "button";
       button.className = "book__slot";
-      button.textContent = taken ? time + " taken" : time;
-      button.disabled = taken || passed;
+      var label = document.createElement("span");
+      label.textContent = time;
+      button.appendChild(label);
+      if (free.length < CREW.length) {
+        var meta = document.createElement("span");
+        meta.className = "book__slot-meta";
+        meta.textContent = free.length ? free.length + " free" : "Full";
+        button.appendChild(meta);
+      }
+      button.disabled = !free.length || passed;
+      button.setAttribute("aria-label", time + (free.length ? ", " + free.length + " free" : ", full"));
       if (time === selectedTime) {
         button.classList.add("is-selected");
         button.setAttribute("aria-pressed", "true");
       }
       button.addEventListener("click", function () {
-        selectedTime = time;
-        showError("");
-        render();
-        form.hidden = false;
-        var name = form.elements.name;
-        if (name) name.focus();
+        pickTime(time);
       });
       list.appendChild(button);
     });
     slotsEl.appendChild(list);
+    if (selectedTime) renderCrew(freeCrew(selectedDate, selectedTime));
+  }
+
+  function pickTime(time) {
+    var free = freeCrew(selectedDate, time);
+    var keep = free.some(function (person) { return person.id === selectedPerson; });
+    selectedTime = time;
+    if (!keep) selectedPerson = free.length ? free[0].id : "";
+    showError("");
+    var showForm = form.hidden;
+    render();
+    if (showForm && selectedPerson && form.elements.name) form.elements.name.focus();
+  }
+
+  function renderCrew(free) {
+    var title = document.createElement("p");
+    title.className = "book__hint";
+    var josephFree = free.some(function (person) { return person.id === "joseph"; });
+    if (josephFree) {
+      title.textContent = "Joseph is free. Any of the crew can take it instead.";
+    } else if (free.length) {
+      title.textContent = "Joseph is already booked. " + free[0].name + " can take this visit.";
+    } else {
+      title.textContent = "Everyone is out at this time.";
+    }
+    slotsEl.appendChild(title);
+
+    var people = document.createElement("div");
+    people.className = "book__people";
+    CREW.forEach(function (person) {
+      var open = free.some(function (item) { return item.id === person.id; });
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "book__person";
+      button.textContent = open ? person.name : person.name + " · out";
+      button.disabled = !open;
+      button.setAttribute("aria-pressed", person.id === selectedPerson ? "true" : "false");
+      if (person.id === selectedPerson) button.classList.add("is-selected");
+      button.addEventListener("click", function () {
+        selectedPerson = person.id;
+        showError("");
+        render();
+      });
+      people.appendChild(button);
+    });
+    slotsEl.appendChild(people);
+
+    var note = document.createElement("p");
+    note.className = "book__hint";
+    note.textContent = "Preview names. Joseph can swap these five for his team.";
+    slotsEl.appendChild(note);
   }
 
   function onSubmit(event) {
     event.preventDefault();
     showError("");
-    if (!selectedDate || !selectedTime) {
-      showError("Choose a day and a time first.");
+    if (!selectedDate || !selectedTime || !selectedPerson) {
+      showError("Choose a day, a time, and who comes.");
       return;
     }
-    if (isTaken(selectedDate, selectedTime) || isPastSlot(selectedDate, selectedTime)) {
-      showError("That time has just gone. Choose another.");
-      selectedTime = "";
+    if (!personFree(selectedDate, selectedTime, selectedPerson) || isPastSlot(selectedDate, selectedTime)) {
+      showError("That installer has just been booked. Choose another.");
+      selectedPerson = "";
       render();
       return;
     }
@@ -205,9 +271,12 @@
       showError("Add a name and a phone number.");
       return;
     }
+    var person = crewById(selectedPerson);
     var entry = {
       date: iso(selectedDate),
       time: selectedTime,
+      person: person.id,
+      personName: person.name,
       name: name,
       phone: phone,
       note: note,
@@ -230,15 +299,18 @@
     done.hidden = false;
     var when = document.getElementById("book-when");
     var who = document.getElementById("book-who");
+    var installer = entry.personName || "Joseph Voskuil";
     when.textContent = formatLong(fromIso(entry.date)) + " at " + entry.time;
-    who.textContent = entry.name + (entry.note ? " · " + entry.note : "");
-    var message = "JVGas visit: " + when.textContent + ". " + entry.name + ", " + entry.phone + (entry.note ? ". " + entry.note : "");
+    who.textContent = installer + " will come. " + entry.name + (entry.note ? " · " + entry.note : "");
+    var message = "JVGas visit: " + when.textContent + ". Installer: " + installer + ". " + entry.name + ", " + entry.phone + (entry.note ? ". " + entry.note : "");
     var wa = document.getElementById("book-wa");
     wa.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(message);
     done.dataset.date = entry.date;
     done.dataset.time = entry.time;
     done.dataset.note = entry.note || "";
     done.dataset.name = entry.name;
+    done.dataset.person = entry.person || "joseph";
+    done.dataset.personName = installer;
     var ics = document.getElementById("book-ics");
     if (ics) ics.focus();
   }
@@ -249,8 +321,9 @@
     if (!date || !time) return;
     var start = stamp(date, time);
     var end = stamp(date, addMinutes(time, 90));
-    var summary = "JVGas site visit";
-    var description = "Visit with " + (done.dataset.name || "JVGas") + (done.dataset.note ? ". " + done.dataset.note : "");
+    var installer = done.dataset.personName || "JVGas";
+    var summary = "JVGas visit with " + installer;
+    var description = "Installer: " + installer + ". Customer: " + (done.dataset.name || "JVGas") + (done.dataset.note ? ". " + done.dataset.note : "");
     var ics = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -299,11 +372,34 @@
     }
   }
 
-  function isTaken(date, time) {
+  function personIdOf(entry) {
+    return entry.person || "joseph";
+  }
+
+  function crewById(id) {
+    for (var i = 0; i < CREW.length; i++) {
+      if (CREW[i].id === id) return CREW[i];
+    }
+    return CREW[0];
+  }
+
+  function bookingsAt(date, time) {
     var key = iso(date) + "|" + time;
-    return load().some(function (entry) {
+    return load().filter(function (entry) {
       return entry.date + "|" + entry.time === key;
     });
+  }
+
+  function freeCrew(date, time) {
+    var taken = {};
+    bookingsAt(date, time).forEach(function (entry) {
+      taken[personIdOf(entry)] = true;
+    });
+    return CREW.filter(function (person) { return !taken[person.id]; });
+  }
+
+  function personFree(date, time, id) {
+    return freeCrew(date, time).some(function (person) { return person.id === id; });
   }
 
   function isPastSlot(date, time) {
@@ -368,13 +464,13 @@
   }
 
   function entryKey(entry) {
-    return entry.date + "|" + entry.time;
+    return entry.date + "|" + entry.time + "|" + personIdOf(entry);
   }
 
-  function updateEntry(date, time, mutate) {
+  function updateEntry(date, time, person, mutate) {
     var all = load();
     all.forEach(function (entry) {
-      if (entry.date === date && entry.time === time) mutate(entry);
+      if (entry.date === date && entry.time === time && personIdOf(entry) === person) mutate(entry);
     });
     localStorage.setItem(STORAGE, JSON.stringify(all));
   }
@@ -434,10 +530,12 @@
     }
     document.getElementById("remind-title").textContent = title;
     document.getElementById("remind-when").textContent = formatLong(fromIso(entry.date)) + " at " + entry.time;
-    document.getElementById("remind-who").textContent = entry.name + (entry.note ? " · " + entry.note : "");
+    var installer = entry.personName || "Joseph Voskuil";
+    document.getElementById("remind-who").textContent = installer + " · " + entry.name + (entry.note ? " · " + entry.note : "");
     document.getElementById("remind-due").textContent = due;
     remindRoot.dataset.date = entry.date;
     remindRoot.dataset.time = entry.time;
+    remindRoot.dataset.person = personIdOf(entry);
     remindRoot.dataset.kind = alarm.kind;
     var snoozeBtn = document.getElementById("remind-snooze-btn");
     if (snoozeBtn) snoozeBtn.focus();
@@ -454,11 +552,12 @@
   function snoozeReminder() {
     var date = remindRoot.dataset.date;
     var time = remindRoot.dataset.time;
+    var person = remindRoot.dataset.person || "joseph";
     var kind = remindRoot.dataset.kind;
     var select = document.getElementById("remind-snooze");
     var minutes = Number(select && select.value) || 15;
     if (minutes % 15 !== 0) minutes = 15;
-    updateEntry(date, time, function (entry) {
+    updateEntry(date, time, person, function (entry) {
       entry.remindAt = Date.now() + minutes * 60 * 1000;
       entry.earlyDismissed = false;
       if (kind === "final") entry.finalDismissed = true;
@@ -470,8 +569,9 @@
   function dismissReminder() {
     var date = remindRoot.dataset.date;
     var time = remindRoot.dataset.time;
+    var person = remindRoot.dataset.person || "joseph";
     var kind = remindRoot.dataset.kind;
-    updateEntry(date, time, function (entry) {
+    updateEntry(date, time, person, function (entry) {
       if (kind === "final") {
         entry.finalDismissed = true;
         entry.earlyDismissed = true;
