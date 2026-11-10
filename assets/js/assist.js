@@ -111,15 +111,49 @@
       done.hidden = true;
     }
 
+    var MAX_BYTES = 10 * 1024 * 1024;
+
+    function isVideo(file) {
+      return file.type.indexOf("video/") === 0;
+    }
+
+    function mediaCounts(list) {
+      var photos = 0;
+      var videos = 0;
+      list.forEach(function (file) {
+        if (isVideo(file)) videos += 1;
+        else photos += 1;
+      });
+      return { photos: photos, videos: videos };
+    }
+
+    function mediaLine(counts) {
+      var parts = [];
+      if (counts.photos) parts.push(counts.photos + " photo" + (counts.photos === 1 ? "" : "s"));
+      if (counts.videos) parts.push(counts.videos + " video" + (counts.videos === 1 ? "" : "s"));
+      return parts.join(" · ");
+    }
+
     function renderPreviews() {
       previews.textContent = "";
       files().forEach(function (file) {
         var frame = document.createElement("span");
         frame.className = "quote__preview";
-        var img = document.createElement("img");
-        img.alt = "";
-        img.src = URL.createObjectURL(file);
-        frame.appendChild(img);
+        var url = URL.createObjectURL(file);
+        if (isVideo(file)) {
+          var video = document.createElement("video");
+          video.muted = true;
+          video.defaultMuted = true;
+          video.playsInline = true;
+          video.setAttribute("muted", "");
+          video.src = url;
+          frame.appendChild(video);
+        } else {
+          var img = document.createElement("img");
+          img.alt = "";
+          img.src = url;
+          frame.appendChild(img);
+        }
         previews.appendChild(frame);
       });
     }
@@ -140,8 +174,13 @@
         "Phone: " + phone
       ];
       if (area) lines.push("Area: " + area);
-      var count = files().length;
-      lines.push(count ? "Photos: " + count : "Photos: none yet");
+      var counts = mediaCounts(files());
+      if (!counts.photos && !counts.videos) {
+        lines.push("Photos: none yet");
+      } else {
+        lines.push("Photos: " + counts.photos);
+        if (counts.videos) lines.push("Video: " + counts.videos);
+      }
       return lines.join("\n");
     }
 
@@ -161,8 +200,8 @@
         showError("Add a name and a phone number.");
         return;
       }
-      if (chosenFiles.some(function (file) { return file.size > 3 * 1024 * 1024; })) {
-        showError("Each photo needs to be under 3 MB.");
+      if (chosenFiles.some(function (file) { return file.size > MAX_BYTES; })) {
+        showError("Each file needs to be under 10 MB.");
         return;
       }
       var text = message(name, phone, area);
@@ -196,7 +235,8 @@
 
     function finish() {
       var summary = document.getElementById("quote-summary");
-      summary.textContent = chosenLabels().join(", ") + " · " + files().length + " photo" + (files().length === 1 ? "" : "s");
+      var detail = mediaLine(mediaCounts(files())) || "0 photos";
+      summary.textContent = chosenLabels().join(", ") + " · " + detail;
       flow.hidden = true;
       done.hidden = false;
     }
