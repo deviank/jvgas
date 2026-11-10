@@ -27,9 +27,12 @@
   var today = startOfDay(new Date());
   var maxMonth = new Date(today.getFullYear(), today.getMonth() + 2, 1);
   var view = new Date(today.getFullYear(), today.getMonth(), 1);
+  var DEVICES = ["Hob", "Stove", "Geyser", "Braai", "Commercial kitchen"];
   var selectedDate = null;
   var selectedTime = "";
   var selectedPerson = "";
+  var selectedDevice = "";
+  var lastEntry = null;
   var lastFocus = null;
 
   document.querySelectorAll("[data-book-open]").forEach(function (button) {
@@ -47,6 +50,7 @@
   });
   form.addEventListener("submit", onSubmit);
   document.getElementById("book-ics").addEventListener("click", downloadIcs);
+  renderDevices();
 
   function open() {
     lastFocus = document.activeElement;
@@ -67,7 +71,9 @@
     selectedDate = null;
     selectedTime = "";
     selectedPerson = "";
+    selectedDevice = "";
     flow.hidden = false;
+    renderDevices();
     done.hidden = true;
     form.hidden = true;
     form.reset();
@@ -247,8 +253,31 @@
 
     var note = document.createElement("p");
     note.className = "book__hint";
-    note.textContent = "Preview names. Joseph can swap these five for his team.";
+    var chosen = crewById(selectedPerson);
+    note.textContent = selectedPerson
+      ? "Selected installer: " + chosen.name + ". Preview names. Joseph can swap these five for his team."
+      : "Preview names. Joseph can swap these five for his team.";
     slotsEl.appendChild(note);
+  }
+
+  function renderDevices() {
+    var box = document.getElementById("book-devices");
+    if (!box) return;
+    box.textContent = "";
+    DEVICES.forEach(function (label) {
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "book__person";
+      button.textContent = label;
+      button.setAttribute("aria-pressed", selectedDevice === label ? "true" : "false");
+      if (selectedDevice === label) button.classList.add("is-selected");
+      button.addEventListener("click", function () {
+        selectedDevice = label;
+        showError("");
+        renderDevices();
+      });
+      box.appendChild(button);
+    });
   }
 
   function onSubmit(event) {
@@ -267,6 +296,10 @@
     var name = form.elements.name.value.trim();
     var phone = form.elements.phone.value.trim();
     var note = form.elements.note.value.trim();
+    if (!selectedDevice) {
+      showError("Choose the device.");
+      return;
+    }
     if (!name || !phone) {
       showError("Add a name and a phone number.");
       return;
@@ -277,6 +310,7 @@
       time: selectedTime,
       person: person.id,
       personName: person.name,
+      device: selectedDevice,
       name: name,
       phone: phone,
       note: note,
@@ -299,31 +333,54 @@
     done.hidden = false;
     var when = document.getElementById("book-when");
     var who = document.getElementById("book-who");
+    lastEntry = entry;
     var installer = entry.personName || "Joseph Voskuil";
     when.textContent = formatLong(fromIso(entry.date)) + " at " + entry.time;
-    who.textContent = installer + " will come. " + entry.name + (entry.note ? " · " + entry.note : "");
-    var message = "JVGas visit: " + when.textContent + ". Installer: " + installer + ". " + entry.name + ", " + entry.phone + (entry.note ? ". " + entry.note : "");
+    who.textContent = [
+      "Installer: " + installer,
+      "Customer: " + entry.name,
+      "Device: " + (entry.device || "Not set")
+    ].join("\n");
+    var message = [
+      "JVGas visit: " + when.textContent,
+      "Installer: " + installer,
+      "Customer: " + entry.name,
+      "Device: " + (entry.device || "Not set"),
+      "Phone: " + entry.phone
+    ];
+    if (entry.note) message.push("Note: " + entry.note);
     var wa = document.getElementById("book-wa");
-    wa.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(message);
+    wa.href = "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(message.join("\n"));
     done.dataset.date = entry.date;
     done.dataset.time = entry.time;
-    done.dataset.note = entry.note || "";
-    done.dataset.name = entry.name;
-    done.dataset.person = entry.person || "joseph";
-    done.dataset.personName = installer;
     var ics = document.getElementById("book-ics");
     if (ics) ics.focus();
   }
 
+  function icsText(value) {
+    return String(value || "")
+      .replace(/\\/g, "\\\\")
+      .replace(/\r\n|\n|\r/g, "\\n")
+      .replace(/;/g, "\\;")
+      .replace(/,/g, "\\,");
+  }
+
   function downloadIcs() {
-    var date = done.dataset.date;
-    var time = done.dataset.time;
-    if (!date || !time) return;
-    var start = stamp(date, time);
-    var end = stamp(date, addMinutes(time, 90));
-    var installer = done.dataset.personName || "JVGas";
-    var summary = "JVGas visit with " + installer;
-    var description = "Installer: " + installer + ". Customer: " + (done.dataset.name || "JVGas") + (done.dataset.note ? ". " + done.dataset.note : "");
+    var entry = lastEntry;
+    if (!entry || !entry.date || !entry.time) return;
+    var installer = entry.personName || "Joseph Voskuil";
+    var device = entry.device || "Visit";
+    var details = [
+      "Installer: " + installer,
+      "Customer: " + (entry.name || ""),
+      "Device: " + device
+    ];
+    if (entry.phone) details.push("Phone: " + entry.phone);
+    if (entry.note) details.push("Note: " + entry.note);
+    var summary = device + " with " + installer;
+    var alarm = device + " with " + installer;
+    var start = stamp(entry.date, entry.time);
+    var end = stamp(entry.date, addMinutes(entry.time, 90));
     var ics = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
@@ -331,18 +388,18 @@
       "BEGIN:VEVENT",
       "DTSTART:" + start,
       "DTEND:" + end,
-      "SUMMARY:" + summary,
-      "DESCRIPTION:" + description.replace(/\n/g, " "),
+      "SUMMARY:" + icsText(summary),
+      "DESCRIPTION:" + icsText(details.join("\n")),
       "LOCATION:Cape Town",
       "BEGIN:VALARM",
       "TRIGGER:-PT15M",
       "ACTION:DISPLAY",
-      "DESCRIPTION:JVGas visit in 15 minutes",
+      "DESCRIPTION:" + icsText(alarm + " in 15 minutes"),
       "END:VALARM",
       "BEGIN:VALARM",
       "TRIGGER:-PT5M",
       "ACTION:DISPLAY",
-      "DESCRIPTION:JVGas visit in 5 minutes",
+      "DESCRIPTION:" + icsText(alarm + " in 5 minutes"),
       "END:VALARM",
       "END:VEVENT",
       "END:VCALENDAR"
@@ -351,7 +408,7 @@
     var url = URL.createObjectURL(blob);
     var link = document.createElement("a");
     link.href = url;
-    link.download = "jvgas-visit-" + date + ".ics";
+    link.download = "jvgas-visit-" + entry.date + ".ics";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -531,7 +588,8 @@
     document.getElementById("remind-title").textContent = title;
     document.getElementById("remind-when").textContent = formatLong(fromIso(entry.date)) + " at " + entry.time;
     var installer = entry.personName || "Joseph Voskuil";
-    document.getElementById("remind-who").textContent = installer + " · " + entry.name + (entry.note ? " · " + entry.note : "");
+    var device = entry.device ? entry.device + " · " : "";
+    document.getElementById("remind-who").textContent = installer + " · " + device + entry.name + (entry.note ? " · " + entry.note : "");
     document.getElementById("remind-due").textContent = due;
     remindRoot.dataset.date = entry.date;
     remindRoot.dataset.time = entry.time;

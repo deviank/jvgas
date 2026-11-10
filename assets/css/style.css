@@ -1451,6 +1451,8 @@ body.nav-open .gas-fab { visibility: hidden; }
 
 #quote-done .btn { width: 100%; margin-top: 12px; }
 
+#book-who { white-space: pre-line; }
+
 .cert__back {
   display: inline-block;
   margin-bottom: 18px;

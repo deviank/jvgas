@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=11">
+  <link rel="stylesheet" href="assets/css/style.css?v=12">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -263,14 +263,16 @@
         <div class="book__slots" id="book-slots"></div>
         <p class="book__error" id="book-error" hidden></p>
         <form class="book__form" id="book-form" hidden>
+          <p class="book__hint">Device</p>
+          <div class="book__people" id="book-devices"></div>
           <label>Name
             <input name="name" type="text" autocomplete="name" required maxlength="80">
           </label>
           <label>Phone
             <input name="phone" type="tel" autocomplete="tel" required inputmode="tel" maxlength="20">
           </label>
-          <label>What do you need
-            <input name="note" type="text" maxlength="160" placeholder="Hob, geyser, commercial kitchen">
+          <label>Note
+            <input name="note" type="text" maxlength="160" placeholder="Optional">
           </label>
           <button class="btn btn--light" type="submit">Request this visit</button>
         </form>
@@ -373,7 +375,7 @@
   </div>
 
   <script src="assets/js/main.js?v=3"></script>
-  <script src="assets/js/booking.js?v=3"></script>
+  <script src="assets/js/booking.js?v=4"></script>
   <script src="assets/js/assist.js?v=2"></script>
 </body>
 </html>
