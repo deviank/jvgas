@@ -85,7 +85,17 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && !root.hidden) close();
     });
-    form.addEventListener("submit", onSubmit);
+    var sendBtn = form.querySelector("button[type='submit']");
+    if (sendBtn) {
+      sendBtn.addEventListener("click", function (event) {
+        event.preventDefault();
+        beginSend();
+      });
+    }
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      beginSend();
+    });
 
     function close() {
       root.hidden = true;
@@ -225,8 +235,7 @@
       return lines.join("\n");
     }
 
-    function onSubmit(event) {
-      event.preventDefault();
+    function beginSend() {
       showError("");
       var labels = chosenLabels();
       var name = form.elements.name.value.trim();
@@ -245,23 +254,34 @@
         showError("Each file needs to be under 10 MB.");
         return;
       }
-      var text = message(name, phone, area);
-      send(text, chosenFiles);
+      send(message(name, phone, area), chosenFiles);
     }
 
-    function tryShare(payload) {
-      return new Promise(function (resolve, reject) {
-        try {
-          var pending = navigator.share(payload);
-          if (!pending || !pending.then) {
-            reject(new Error("share"));
-            return;
-          }
-          pending.then(resolve, reject);
-        } catch (error) {
-          reject(error);
-        }
-      });
+    function asShareFile(file) {
+      var type = file.type || "";
+      if (type.indexOf("image/") === 0 || type.indexOf("video/") === 0) return file;
+      var name = file.name || "photo.jpg";
+      var lower = name.toLowerCase();
+      var next = "image/jpeg";
+      if (/\.(mp4|mov|m4v|webm)$/.test(lower)) next = "video/mp4";
+      else if (/\.png$/.test(lower)) next = "image/png";
+      else if (/\.gif$/.test(lower)) next = "image/gif";
+      else if (/\.webp$/.test(lower)) next = "image/webp";
+      else if (!/\.jpe?g$/.test(lower)) name = name.replace(/\.[^.]+$/, "") + ".jpg";
+      try {
+        return new File([file], name, { type: next, lastModified: file.lastModified });
+      } catch (error) {
+        return file;
+      }
+    }
+
+    function canShare(payload) {
+      if (!navigator.canShare) return true;
+      try {
+        return navigator.canShare(payload);
+      } catch (error) {
+        return false;
+      }
     }
 
     function send(text, chosenFiles) {
@@ -273,16 +293,48 @@
         showError("Open this page on your phone and tap Send to Joseph. Choose WhatsApp in the share sheet so the photos are attached.");
         return;
       }
-      tryShare({ files: chosenFiles, text: text }).then(finish).catch(function (error) {
+      var ready = chosenFiles.map(asShareFile);
+      var withText = { files: ready, text: text };
+      var filesOnly = { files: ready };
+      var payload = canShare(withText) ? withText : (canShare(filesOnly) ? filesOnly : withText);
+      var includeText = !!payload.text;
+      function afterShare() {
+        if (!includeText) openWhatsApp(text);
+        else finish();
+      }
+      function failed(error) {
         if (error && error.name === "AbortError") return;
-        tryShare({ files: chosenFiles }).then(function () {
-          openWhatsApp(text);
-          finish();
-        }).catch(function (second) {
-          if (second && second.name === "AbortError") return;
-          showError("The photos were not attached. Tap Send to Joseph again and choose WhatsApp in the share sheet. A normal WhatsApp link cannot carry the pictures.");
+        showError("The photos are on the form. Tap Send to Joseph again and choose WhatsApp in the share sheet.");
+      }
+      try {
+        var pending = navigator.share(payload);
+        if (!pending || !pending.then) throw new Error("share");
+        pending.then(afterShare).catch(function (error) {
+          if (error && error.name === "AbortError") return;
+          if (!includeText) {
+            failed(error);
+            return;
+          }
+          try {
+            includeText = false;
+            navigator.share(filesOnly).then(afterShare).catch(failed);
+          } catch (second) {
+            failed(second);
+          }
         });
-      });
+      } catch (error) {
+        if (error && error.name === "AbortError") return;
+        if (!includeText) {
+          failed(error);
+          return;
+        }
+        try {
+          includeText = false;
+          navigator.share(filesOnly).then(afterShare).catch(failed);
+        } catch (second) {
+          failed(second);
+        }
+      }
     }
 
     function openWhatsApp(text) {
