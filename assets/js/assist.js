@@ -249,23 +249,40 @@
       send(text, chosenFiles);
     }
 
-    function send(text, chosenFiles) {
-      if (chosenFiles.length && typeof navigator.share === "function") {
-        var payload = { title: "JVGas quote", text: text, files: chosenFiles };
+    function tryShare(payload) {
+      return new Promise(function (resolve, reject) {
         try {
           var pending = navigator.share(payload);
-          if (pending && pending.then) {
-            pending.then(finish).catch(function (error) {
-              if (error && error.name === "AbortError") return;
-              openWhatsApp(text);
-            });
+          if (!pending || !pending.then) {
+            reject(new Error("share"));
             return;
           }
+          pending.then(resolve, reject);
         } catch (error) {
-          if (error && error.name === "AbortError") return;
+          reject(error);
         }
+      });
+    }
+
+    function send(text, chosenFiles) {
+      if (!chosenFiles.length) {
+        openWhatsApp(text);
+        return;
       }
-      openWhatsApp(text);
+      if (typeof navigator.share !== "function") {
+        showError("Open this page on your phone and tap Send to Joseph. Choose WhatsApp in the share sheet so the photos are attached.");
+        return;
+      }
+      tryShare({ files: chosenFiles, text: text }).then(finish).catch(function (error) {
+        if (error && error.name === "AbortError") return;
+        tryShare({ files: chosenFiles }).then(function () {
+          openWhatsApp(text);
+          finish();
+        }).catch(function (second) {
+          if (second && second.name === "AbortError") return;
+          showError("The photos were not attached. Tap Send to Joseph again and choose WhatsApp in the share sheet. A normal WhatsApp link cannot carry the pictures.");
+        });
+      });
     }
 
     function openWhatsApp(text) {
