@@ -377,8 +377,8 @@
     ];
     if (entry.phone) details.push("Phone: " + entry.phone);
     if (entry.note) details.push("Note: " + entry.note);
-    var summary = device + " with " + installer;
-    var alarm = device + " with " + installer;
+    var summary = device + " with " + installer + " from JVGas";
+    var alarm = summary;
     var start = stamp(entry.date, entry.time);
     var end = stamp(entry.date, addMinutes(entry.time, 90));
     var ics = [

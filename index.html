@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=12">
+  <link rel="stylesheet" href="assets/css/style.css?v=13">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -349,9 +349,10 @@
         <div class="quote__types" id="quote-types"></div>
         <form class="book__form" id="quote-form">
           <label>Photos or a short video
-            <input name="photos" type="file" accept="image/*,video/*" multiple>
+            <input class="quote__file" name="photos" type="file" accept="image/*,video/*" multiple>
           </label>
           <div class="quote__previews" id="quote-previews"></div>
+          <button class="btn btn--ghost" type="button" id="quote-add">Add a photo or video</button>
           <label>Name
             <input name="name" type="text" autocomplete="name" required maxlength="80">
           </label>
@@ -375,7 +376,7 @@
   </div>
 
   <script src="assets/js/main.js?v=3"></script>
-  <script src="assets/js/booking.js?v=4"></script>
-  <script src="assets/js/assist.js?v=2"></script>
+  <script src="assets/js/booking.js?v=5"></script>
+  <script src="assets/js/assist.js?v=3"></script>
 </body>
 </html>

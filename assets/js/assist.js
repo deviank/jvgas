@@ -85,7 +85,6 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && !root.hidden) close();
     });
-    form.elements.photos.addEventListener("change", renderPreviews);
     form.addEventListener("submit", onSubmit);
 
     function close() {
@@ -105,13 +104,24 @@
         button.setAttribute("aria-pressed", on ? "true" : "false");
       });
       form.reset();
+      picked = [];
       previews.textContent = "";
+      updateAddButton();
       showError("");
       flow.hidden = false;
       done.hidden = true;
     }
 
     var MAX_BYTES = 10 * 1024 * 1024;
+    var picked = [];
+    var addBtn = document.getElementById("quote-add");
+
+    form.elements.photos.addEventListener("change", onFilesChosen);
+    if (addBtn) {
+      addBtn.addEventListener("click", function () {
+        form.elements.photos.click();
+      });
+    }
 
     function isVideo(file) {
       return file.type.indexOf("video/") === 0;
@@ -134,9 +144,29 @@
       return parts.join(" · ");
     }
 
+    function onFilesChosen() {
+      var incoming = Array.prototype.slice.call(form.elements.photos.files || []);
+      incoming.forEach(function (file) {
+        if (picked.length >= 4) return;
+        var same = picked.some(function (have) {
+          return have.name === file.name && have.size === file.size && have.lastModified === file.lastModified;
+        });
+        if (!same) picked.push(file);
+      });
+      form.elements.photos.value = "";
+      renderPreviews();
+    }
+
+    function updateAddButton() {
+      if (!addBtn) return;
+      var count = picked.length;
+      addBtn.hidden = count >= 4;
+      addBtn.textContent = count ? "Add another" : "Add a photo or video";
+    }
+
     function renderPreviews() {
       previews.textContent = "";
-      files().forEach(function (file) {
+      files().forEach(function (file, index) {
         var frame = document.createElement("span");
         frame.className = "quote__preview";
         var url = URL.createObjectURL(file);
@@ -154,12 +184,23 @@
           img.src = url;
           frame.appendChild(img);
         }
+        var remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "quote__remove";
+        remove.setAttribute("aria-label", "Remove " + file.name);
+        remove.textContent = "×";
+        remove.addEventListener("click", function () {
+          picked.splice(index, 1);
+          renderPreviews();
+        });
+        frame.appendChild(remove);
         previews.appendChild(frame);
       });
+      updateAddButton();
     }
 
     function files() {
-      return Array.prototype.slice.call(form.elements.photos.files || []).slice(0, 4);
+      return picked.slice(0, 4);
     }
 
     function chosenLabels() {
@@ -209,20 +250,20 @@
     }
 
     function send(text, chosenFiles) {
-      var payload = { text: text };
-      if (chosenFiles.length) payload.files = chosenFiles;
-      var canShareFiles = false;
-      try {
-        canShareFiles = !!(navigator.canShare && navigator.share && navigator.canShare(payload));
-      } catch (error) {
-        canShareFiles = false;
-      }
-      if (canShareFiles) {
-        navigator.share(payload).then(finish).catch(function (error) {
+      if (chosenFiles.length && typeof navigator.share === "function") {
+        var payload = { title: "JVGas quote", text: text, files: chosenFiles };
+        try {
+          var pending = navigator.share(payload);
+          if (pending && pending.then) {
+            pending.then(finish).catch(function (error) {
+              if (error && error.name === "AbortError") return;
+              openWhatsApp(text);
+            });
+            return;
+          }
+        } catch (error) {
           if (error && error.name === "AbortError") return;
-          openWhatsApp(text);
-        });
-        return;
+        }
       }
       openWhatsApp(text);
     }
