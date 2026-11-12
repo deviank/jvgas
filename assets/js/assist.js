@@ -85,13 +85,8 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && !root.hidden) close();
     });
-    var sendBtn = form.querySelector("button[type='submit']");
-    if (sendBtn) {
-      sendBtn.addEventListener("click", function (event) {
-        event.preventDefault();
-        beginSend();
-      });
-    }
+    var sendBtn = document.getElementById("quote-send");
+    if (sendBtn) sendBtn.addEventListener("click", beginSend);
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       beginSend();
@@ -294,21 +289,48 @@
         showError("Open this page on your phone and tap Send to Joseph. Choose WhatsApp when the phone asks where to share.");
         return;
       }
-      var ready = chosenFiles.map(asShareFile);
+      var firefox = /Firefox/i.test(navigator.userAgent);
+      var ready = firefox ? chosenFiles.slice() : chosenFiles.map(asShareFile);
+      var filesOnly = { files: ready };
+      var withText = { files: ready, text: text };
+      var payload = filesOnly;
+      if (firefox) {
+        var allowText = true;
+        if (navigator.canShare) {
+          try {
+            allowText = navigator.canShare(withText);
+          } catch (error) {
+            allowText = false;
+          }
+        }
+        payload = allowText ? withText : filesOnly;
+      }
       function afterPhotos() {
         finish();
-        window.location.assign("https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text));
+        if (!payload.text) {
+          window.location.assign("https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text));
+        }
       }
       function failed(error) {
         if (error && error.name === "AbortError") return;
         showError("The phone did not open sharing. Tap Send to Joseph again and choose WhatsApp.");
       }
       try {
-        var pending = navigator.share({ files: ready });
+        var pending = navigator.share(payload);
         if (!pending || !pending.then) throw new Error("share");
         pending.then(afterPhotos).catch(failed);
       } catch (error) {
-        failed(error);
+        if (error && error.name === "AbortError") return;
+        if (!payload.text) {
+          failed(error);
+          return;
+        }
+        payload = filesOnly;
+        try {
+          navigator.share(payload).then(afterPhotos).catch(failed);
+        } catch (second) {
+          failed(second);
+        }
       }
     }
 
