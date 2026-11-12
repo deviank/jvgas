@@ -257,30 +257,31 @@
       send(message(name, phone, area), chosenFiles);
     }
 
-    function asShareFile(file) {
+    function asShareFile(file, index) {
+      var lower = (file.name || "").toLowerCase();
       var type = file.type || "";
-      if (type.indexOf("image/") === 0 || type.indexOf("video/") === 0) return file;
-      var name = file.name || "photo.jpg";
-      var lower = name.toLowerCase();
-      var next = "image/jpeg";
-      if (/\.(mp4|mov|m4v|webm)$/.test(lower)) next = "video/mp4";
-      else if (/\.png$/.test(lower)) next = "image/png";
-      else if (/\.gif$/.test(lower)) next = "image/gif";
-      else if (/\.webp$/.test(lower)) next = "image/webp";
-      else if (!/\.jpe?g$/.test(lower)) name = name.replace(/\.[^.]+$/, "") + ".jpg";
+      var mime = "image/jpeg";
+      var ext = "jpg";
+      if (type.indexOf("video/") === 0 || /\.(mp4|mov|m4v|webm)$/.test(lower)) {
+        mime = type.indexOf("video/") === 0 ? type : "video/mp4";
+        ext = "mp4";
+      } else if (type === "image/png" || /\.png$/.test(lower)) {
+        mime = "image/png";
+        ext = "png";
+      } else if (type === "image/webp" || /\.webp$/.test(lower)) {
+        mime = "image/webp";
+        ext = "webp";
+      } else if (type === "image/gif" || /\.gif$/.test(lower)) {
+        mime = "image/gif";
+        ext = "gif";
+      }
       try {
-        return new File([file], name, { type: next, lastModified: file.lastModified });
+        return new File([file.slice(0, file.size, mime)], "jvgas-" + (index + 1) + "." + ext, {
+          type: mime,
+          lastModified: file.lastModified || Date.now()
+        });
       } catch (error) {
         return file;
-      }
-    }
-
-    function canShare(payload) {
-      if (!navigator.canShare) return true;
-      try {
-        return navigator.canShare(payload);
-      } catch (error) {
-        return false;
       }
     }
 
@@ -290,50 +291,24 @@
         return;
       }
       if (typeof navigator.share !== "function") {
-        showError("Open this page on your phone and tap Send to Joseph. Choose WhatsApp in the share sheet so the photos are attached.");
+        showError("Open this page on your phone and tap Send to Joseph. Choose WhatsApp when the phone asks where to share.");
         return;
       }
       var ready = chosenFiles.map(asShareFile);
-      var withText = { files: ready, text: text };
-      var filesOnly = { files: ready };
-      var payload = canShare(withText) ? withText : (canShare(filesOnly) ? filesOnly : withText);
-      var includeText = !!payload.text;
-      function afterShare() {
-        if (!includeText) openWhatsApp(text);
-        else finish();
+      function afterPhotos() {
+        finish();
+        window.location.assign("https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text));
       }
       function failed(error) {
         if (error && error.name === "AbortError") return;
-        showError("The photos are on the form. Tap Send to Joseph again and choose WhatsApp in the share sheet.");
+        showError("The phone did not open sharing. Tap Send to Joseph again and choose WhatsApp.");
       }
       try {
-        var pending = navigator.share(payload);
+        var pending = navigator.share({ files: ready });
         if (!pending || !pending.then) throw new Error("share");
-        pending.then(afterShare).catch(function (error) {
-          if (error && error.name === "AbortError") return;
-          if (!includeText) {
-            failed(error);
-            return;
-          }
-          try {
-            includeText = false;
-            navigator.share(filesOnly).then(afterShare).catch(failed);
-          } catch (second) {
-            failed(second);
-          }
-        });
+        pending.then(afterPhotos).catch(failed);
       } catch (error) {
-        if (error && error.name === "AbortError") return;
-        if (!includeText) {
-          failed(error);
-          return;
-        }
-        try {
-          includeText = false;
-          navigator.share(filesOnly).then(afterShare).catch(failed);
-        } catch (second) {
-          failed(second);
-        }
+        failed(error);
       }
     }
 
